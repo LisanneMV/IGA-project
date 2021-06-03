@@ -60,46 +60,18 @@ F_co2 = mrio['F_co2']
 H = mrio['H']
 H_co2 = mrio['H_co2']
 A = mrio['A']
-A_final = mrio['A_final']
-Y_final = mrio['Y_final']
 
 
-#Impact Covid hotel and restauratn sector Netherlands 
-A_new0 = A_final[4375,:] * 0.43
-A_new1 = A_final[:,4375] * 0.43
-A_new2 = A_final[4375,4375] * 0.43
-
-A_final[4375,:] = A_new0
-A_final[:,4375] = A_new1
-A_final[4375,4375] = A_new2
-
-
-I = np.identity(9800)
-L_new = np.linalg.inv(I - A_final)
-
+#the original scenario
 
 # calculate total output 
 x = L @ Y.sum(1)
 
-x_new = L_new @ Y.sum(1)
 
-
-#Implement Package NOW1
-NOW_1 = F[2:4, 4375].sum() * 0.45
-
-GOV = Y_final[4375,149] + NOW_1
-Y_final[4375,149] = GOV
 
 # calculate direct emissions intensity
 f_co2 = F_co2/x                                                                     # resulting in na or inf when x = 0 
 f_co2 = np.nan_to_num(f_co2, copy=False, nan=0.0, posinf=0.0, neginf=0.0)           # replace na and inf with 0
-
-
-
-#original names(Y,A,L), null(Y_null,A_null,L_null), 3. now(Y_now,A_now,L_now
-
-f_co2_new = F_co2/x_new                                                                 # resulting in na or inf when x = 0 
-f_co2_new = np.nan_to_num(f_co2_new, copy=False, nan=0.0, posinf=0.0, neginf=0.0)           # replace na and inf with 0
 
 
 ##############################################
@@ -224,6 +196,53 @@ else :
     for i in range(0,5) :    
         print("Top", i+1, label_r[rank[i]],"(country index =", rank[i], ");")
  
+
+#%%the scenario where the impact of COVID 19 is calculated on the hospitality sector in the Netherlands
+#hospitality sector is line 4375
+
+A_Covid = mrio['A_Covid']
+Y_Covid = mrio['Y_Covid']
+
+A_new0 =A_Covid[4375,:] * 0.43
+A_new1 =A_Covid[:,4375] * 0.43
+A_new2 = A_Covid[4375,4375] * 0.43
+
+A_Covid[4375,:] = A_new0
+A_Covid[:,4375] = A_new1
+A_Covid[4375,4375] = A_new2
+
+
+I = np.identity(9800)
+L_Covid = np.linalg.inv(I - A_Covid)
+
+x_Covid = L_Covid @ Y.sum(1)
+
+
+f_co2_Covid = F_co2/x_Covid                                                                 # resulting in na or inf when x = 0 
+f_co2_Covid = np.nan_to_num(f_co2_Covid, copy=False, nan=0.0, posinf=0.0, neginf=0.0)           # replace na and inf with 0
+
+#%%the scenario where the impact of COVID 19 is calculated on the hospitality sector in the Netherlands
+
+A_NOW1 = mrio['A_NOW1']
+Y_NOW1 = mrio['Y_NOW1']
+
+#Implement Package NOW1
+NOW_1 = F[2:4, 4375].sum() * 0.45
+
+
+#F_co2_NOW1 = NOW_1[pos_co2,:]              #NOW1 should be translated to FCO2 but how?
+#F_co2_NOW1 = np.sum(F_co2,0)                                                                    # obtain a CO2 extension vector 
+
+GOV = Y_NOW1[4375,149] + NOW_1
+Y_NOW1[4375,149] = GOV
+
+
+x_NOW1 = L_Covid @ Y_NOW1.sum(1)
+
+
+f_co2_NOW1 = F_co2_NOW1/x_NOW1                                                                # resulting in na or inf when x = 0 
+f_co2_NOW1 = np.nan_to_num(f_co2_NOW1, copy=False, nan=0.0, posinf=0.0, neginf=0.0)  
+
 
 
 
